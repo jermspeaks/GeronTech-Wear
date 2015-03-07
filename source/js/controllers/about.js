@@ -1,4 +1,4 @@
-App.controller('AboutCtrl', function ($scope, $routeParams) {
+dhp.controller('AboutCtrl', function ($scope, $routeParams) {
 		$scope.awesomeThings = [
 			'Lorem',
 			'Ipsum',

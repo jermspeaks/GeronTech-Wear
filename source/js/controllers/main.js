@@ -1,4 +1,4 @@
-App.controller('MainCtrl', function ($scope, $routeParams) {
+dhp.controller('MainCtrl', function ($scope, $routeParams) {
 		$scope.awesomeThings = [
 			'jQuery',
 			'AngularJS',

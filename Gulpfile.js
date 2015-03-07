@@ -10,17 +10,18 @@ var less = require('gulp-less');
 var ngmin = require('gulp-ngmin');
 var minifyHTML = require('gulp-minify-html');
 var templates = require('gulp-angular-templatecache');
-
+var filter = require('gulp-filter');
+var mainBowerFiles = require('main-bower-files');
 
 gulp.task('scripts', function() {
   // Minify and copy all JavaScript (except vendor scripts)
 
   gulp.src('source/templates/**/*.html')
     .pipe(minifyHTML({
-          empty: true,
-          spare: true,
-          quotes: true
-      }))
+      empty: true,
+      spare: true,
+      quotes: true
+    }))
     .pipe(templates('templates.js'))
     .pipe(gulp.dest('source/js'));
 
@@ -31,16 +32,18 @@ gulp.task('scripts', function() {
     .pipe(gulp.dest('build/js'));
 
   // Copy vendor files
-  gulp.src(['source/lib/jquery/jquery.min.js','source/lib/angular/angular.min.js','source/lib/angular-route/angular-route.min.js'])
-    .pipe(concat("lib.js"))
-    .pipe(gulp.dest('build/js'));
+  processLibraries();
+
+  // gulp.src(['source/lib/jquery/jquery.min.js', 'source/lib/angular/angular.min.js', 'source/lib/angular-route/angular-route.min.js.map', 'source/lib/angular-route/angular-route.min.js', 'source/lib/Chart.js/Chart.min.js'])
+  //   .pipe(concat("lib.js"))
+  //   .pipe(gulp.dest('build/js'));
 
   gulp.src(['source/lib/**/*.css'])
     .pipe(concat("lib.css"))
     .pipe(gulp.dest('build/css/lib'));
 });
 
-gulp.task('less', function () {
+gulp.task('less', function() {
   gulp.src('source/less/main.less')
     .pipe(less())
     .pipe(gulp.dest('build/css'));
@@ -73,8 +76,8 @@ gulp.task('default', function() {
     gulp.run('less');
   });
   gulp.watch('source/**/*.html', function(event) {
-    gulp.run('copy','scripts');
-  }); 
+    gulp.run('copy', 'scripts');
+  });
   gulp.watch([
     'source/img/**',
     'source/assets/fonts/**',
@@ -83,3 +86,27 @@ gulp.task('default', function() {
     gulp.run('copy');
   });
 });
+
+function filterByExtension(extension) {
+  return filter(function(file) {
+    return file.path.match(new RegExp('.' + extension + '$'));
+  });
+};
+
+function processLibraries(extension) {
+  console.log('processLibraries :: Vendor JS Libraries');
+  var mainFiles = mainBowerFiles({
+    checkExistence: true
+  });
+  var jsFilter = filterByExtension('js');
+
+  if (!mainFiles.length) {
+    // No files found
+    return;
+  }
+
+  return gulp.src(mainFiles)
+    .pipe(jsFilter)
+    .pipe(concat('lib.js'))
+    .pipe(gulp.dest('build/js'));
+};
